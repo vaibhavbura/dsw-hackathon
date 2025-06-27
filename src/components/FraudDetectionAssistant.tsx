@@ -90,8 +90,8 @@ Please format your response as markdown with the following structure:
     return text
       .replace(/^## (.*$)/gm, '<h2 class="text-lg font-semibold mb-2 text-gray-800">$1</h2>')
       .replace(/^### (.*$)/gm, '<h3 class="text-md font-semibold mb-2 text-gray-700">$1</h3>')
-      .replace(/^\* (.*$)/gm, '<li class="ml-4 mb-1">• $1</li>')
-      .replace(/^- (.*$)/gm, '<li class="ml-4 mb-1">• $1</li>')
+      .replace(/^\* (.*$)/gm, '<ul class="ml-4 mb-1">• $1</ul>')
+      .replace(/^- (.*$)/gm, '<ul class="ml-4 mb-1">• $1</ul>')
       .replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold">$1</strong>')
       .replace(/\*(.*?)\*/g, '<em class="italic">$1</em>')
       .replace(/\n\n/g, '<br><br>')
