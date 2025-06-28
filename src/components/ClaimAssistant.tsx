@@ -46,13 +46,21 @@ const ClaimAssistant = () => {
 
 ${rejectionReason}
 
-Please provide:
-1. SIMPLE EXPLANATION: Explain the rejection reason in plain English
-2. WHY THIS HAPPENED: Common reasons for this type of rejection
-3. APPEAL STRATEGY: Steps to take for an appeal
-4. DRAFT APPEAL LETTER: A professional appeal letter template
+Please format your response using markdown with the following structure:
 
-Format your response clearly with these sections.`
+## SIMPLE EXPLANATION
+[Explain the rejection reason in plain English]
+
+## WHY THIS HAPPENED
+[List common causes for this type of rejection]
+
+## APPEAL STRATEGY
+[Steps to take for a successful appeal]
+
+## DRAFT APPEAL LETTER
+[Professional appeal letter template]
+
+Use clear markdown formatting for each section.`
             }]
           }]
         })
@@ -65,7 +73,7 @@ Format your response clearly with these sections.`
       const data = await response.json();
       const result = data.candidates[0]?.content?.parts[0]?.text || 'No assistance available';
       setAssistance(result);
-      
+
       toast({
         title: "Assistance Generated",
         description: "Claim help and appeal draft have been created.",
@@ -80,6 +88,18 @@ Format your response clearly with these sections.`
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const formatMarkdown = (text: string) => {
+    return text
+      .replace(/^## (.*$)/gm, '<h2 class="text-lg font-semibold mb-2 text-gray-800">$1</h2>')
+      .replace(/^### (.*$)/gm, '<h3 class="text-md font-semibold mb-2 text-gray-700">$1</h3>')
+      .replace(/^- (.*$)/gm, '<ul class="ml-4 mb-1">• $1</ul>')
+      .replace(/^\* (.*$)/gm, '<ul class="ml-4 mb-1">• $1</ul>')
+      .replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold">$1</strong>')
+      .replace(/\*(.*?)\*/g, '<em class="italic">$1</em>')
+      .replace(/\n\n/g, '<br><br>')
+      .replace(/\n/g, '<br>');
   };
 
   return (
@@ -102,6 +122,7 @@ Format your response clearly with these sections.`
               onChange={(e) => setRejectionReason(e.target.value)}
               placeholder="Paste your claim rejection letter or describe why your claim was denied..."
               className="min-h-32"
+              disabled={isLoading}
             />
           </div>
 
@@ -126,7 +147,10 @@ Format your response clearly with these sections.`
           <CardContent>
             <Alert>
               <AlertDescription>
-                <pre className="whitespace-pre-wrap text-sm">{assistance}</pre>
+                <div 
+                  className="prose prose-sm max-w-none"
+                  dangerouslySetInnerHTML={{ __html: formatMarkdown(assistance) }}
+                />
               </AlertDescription>
             </Alert>
           </CardContent>

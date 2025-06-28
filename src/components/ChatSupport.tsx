@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -18,7 +17,7 @@ const ChatSupport = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      text: 'Hello! I\'m your insurance support assistant. How can I help you today?',
+      text: `<strong>Hello!</strong> I'm your insurance support assistant. How can I help you today?`,
       isUser: false,
       timestamp: new Date()
     }
@@ -36,9 +35,20 @@ const ChatSupport = () => {
     scrollToBottom();
   }, [messages]);
 
+  const formatMarkdown = (text: string) => {
+    return text
+      .replace(/^## (.*$)/gm, '<h2 class="text-lg font-semibold mb-2 text-gray-800">$1</h2>')
+      .replace(/^### (.*$)/gm, '<h3 class="text-md font-semibold mb-2 text-gray-700">$1</h3>')
+      .replace(/^- (.*$)/gm, '<ul class="ml-4 mb-1">• $1</ul>')
+      .replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold">$1</strong>')
+      .replace(/\*(.*?)\*/g, '<em class="italic">$1</em>')
+      .replace(/\n\n/g, '<br><br>')
+      .replace(/\n/g, '<br>');
+  };
+
   const sendMessage = async () => {
     const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-    
+
     if (!apiKey) {
       toast({
         title: "API Key Missing",
@@ -70,11 +80,14 @@ const ChatSupport = () => {
         body: JSON.stringify({
           contents: [{
             parts: [{
-              text: `You are a professional insurance customer support agent. Answer the following question in a helpful, friendly, and informative manner. Provide accurate information about insurance policies, claims, coverage, and procedures. If you don't know something specific, acknowledge it and suggest contacting the insurance company directly.
+              text: `You are a professional insurance customer support agent. Answer the following question in a helpful, friendly, and informative manner. Provide accurate information about insurance policies, claims, coverage, and procedures.
 
-Question: ${inputMessage}
+Always format your answer in markdown using:
+## SECTION TITLES
+**bold highlights**
+- bullet points (if needed)
 
-Please provide a clear, concise answer that helps the customer understand their insurance options and next steps.`
+Question: ${inputMessage}`
             }]
           }]
         })
@@ -85,11 +98,12 @@ Please provide a clear, concise answer that helps the customer understand their 
       }
 
       const data = await response.json();
-      const botResponse = data.candidates[0]?.content?.parts[0]?.text || 'I apologize, but I couldn\'t process your request. Please try again.';
-      
+      const rawText = data.candidates[0]?.content?.parts[0]?.text || 'I apologize, but I couldn\'t process your request.';
+      const formattedText = formatMarkdown(rawText);
+
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: botResponse,
+        text: formattedText,
         isUser: false,
         timestamp: new Date()
       };
@@ -104,7 +118,7 @@ Please provide a clear, concise answer that helps the customer understand their 
         timestamp: new Date()
       };
       setMessages(prev => [...prev, errorMessage]);
-      
+
       toast({
         title: "Chat Error",
         description: "Failed to get response. Please check your API configuration.",
@@ -152,7 +166,14 @@ Please provide a clear, concise answer that helps the customer understand their 
                     {message.isUser ? <User className="h-4 w-4 text-white" /> : <Bot className="h-4 w-4 text-white" />}
                   </div>
                   <div className={`p-3 rounded-lg ${message.isUser ? 'bg-blue-600 text-white' : 'bg-white border'}`}>
-                    <p className="text-sm whitespace-pre-wrap">{message.text}</p>
+                    {message.isUser ? (
+                      <p className="text-sm whitespace-pre-wrap">{message.text}</p>
+                    ) : (
+                      <div
+                        className="text-sm prose prose-sm max-w-none"
+                        dangerouslySetInnerHTML={{ __html: message.text }}
+                      />
+                    )}
                     <p className={`text-xs mt-1 ${message.isUser ? 'text-blue-100' : 'text-gray-500'}`}>
                       {message.timestamp.toLocaleTimeString()}
                     </p>
@@ -174,7 +195,7 @@ Please provide a clear, concise answer that helps the customer understand their 
             )}
             <div ref={messagesEndRef} />
           </div>
-          
+
           <div className="flex gap-2">
             <Input
               value={inputMessage}
@@ -183,8 +204,8 @@ Please provide a clear, concise answer that helps the customer understand their 
               placeholder="Ask about insurance coverage, claims, policies..."
               disabled={isLoading}
             />
-            <Button 
-              onClick={sendMessage} 
+            <Button
+              onClick={sendMessage}
               disabled={isLoading || !inputMessage.trim()}
               size="icon"
             >

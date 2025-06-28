@@ -29,7 +29,7 @@ const ProductRecommendation = () => {
       return;
     }
 
-    const missingFields = Object.entries(profile).filter(([key, value]) => !value.trim()).map(([key]) => key);
+    const missingFields = Object.entries(profile).filter(([_, value]) => !value.trim()).map(([key]) => key);
     if (missingFields.length > 0) {
       toast({
         title: "Incomplete Profile",
@@ -56,15 +56,26 @@ Annual Income: $${profile.income}
 Family Size: ${profile.familySize}
 Coverage Goal: ${profile.coverageGoal}
 
-Please provide:
-1. TOP RECOMMENDATIONS: 3 specific insurance products/policies
-2. REASONING: Why each recommendation fits this profile
-3. COVERAGE AMOUNTS: Suggested coverage amounts
-4. ESTIMATED COSTS: Approximate monthly/annual premiums
-5. PRIORITY ORDER: Which to get first, second, third
-6. ADDITIONAL CONSIDERATIONS: Any special factors for this profile
+Format your response using markdown and include the following sections:
 
-Format your response with clear sections and bullet points.`
+## TOP RECOMMENDATIONS
+List 3 specific insurance products/policies with names and types.
+
+## REASONING
+Explain why each is suitable based on the profile.
+
+## COVERAGE AMOUNTS
+Provide suggested coverage amounts for each.
+
+## ESTIMATED COSTS
+Estimate monthly or yearly premiums (approximate).
+
+## PRIORITY ORDER
+Which policy to get first, second, and third.
+
+## ADDITIONAL CONSIDERATIONS
+Mention any profile-specific tips, concerns, or requirements.
+`
             }]
           }]
         })
@@ -77,7 +88,7 @@ Format your response with clear sections and bullet points.`
       const data = await response.json();
       const result = data.candidates[0]?.content?.parts[0]?.text || 'No recommendations available';
       setRecommendation(result);
-      
+
       toast({
         title: "Recommendations Generated",
         description: "Personalized insurance recommendations are ready.",
@@ -92,6 +103,17 @@ Format your response with clear sections and bullet points.`
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const formatMarkdown = (text: string) => {
+    return text
+      .replace(/^## (.*$)/gm, '<h2 class="text-lg font-semibold mb-2 text-gray-800">$1</h2>')
+      .replace(/^### (.*$)/gm, '<h3 class="text-md font-semibold mb-2 text-gray-700">$1</h3>')
+      .replace(/^- (.*$)/gm, '<ul class="ml-4 mb-1">• $1</ul>')
+      .replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold">$1</strong>')
+      .replace(/\*(.*?)\*/g, '<em class="italic">$1</em>')
+      .replace(/\n\n/g, '<br><br>')
+      .replace(/\n/g, '<br>');
   };
 
   return (
@@ -113,7 +135,7 @@ Format your response with clear sections and bullet points.`
               <Input
                 type="number"
                 value={profile.age}
-                onChange={(e) => setProfile({...profile, age: e.target.value})}
+                onChange={(e) => setProfile({ ...profile, age: e.target.value })}
                 placeholder="Your age"
               />
             </div>
@@ -123,14 +145,14 @@ Format your response with clear sections and bullet points.`
               <Input
                 type="number"
                 value={profile.income}
-                onChange={(e) => setProfile({...profile, income: e.target.value})}
+                onChange={(e) => setProfile({ ...profile, income: e.target.value })}
                 placeholder="Your annual income"
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium mb-2">Family Size</label>
-              <Select value={profile.familySize} onValueChange={(value) => setProfile({...profile, familySize: value})}>
+              <Select value={profile.familySize} onValueChange={(value) => setProfile({ ...profile, familySize: value })}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select family size" />
                 </SelectTrigger>
@@ -146,7 +168,7 @@ Format your response with clear sections and bullet points.`
 
             <div>
               <label className="block text-sm font-medium mb-2">Coverage Goal</label>
-              <Select value={profile.coverageGoal} onValueChange={(value) => setProfile({...profile, coverageGoal: value})}>
+              <Select value={profile.coverageGoal} onValueChange={(value) => setProfile({ ...profile, coverageGoal: value })}>
                 <SelectTrigger>
                   <SelectValue placeholder="What do you need?" />
                 </SelectTrigger>
@@ -161,8 +183,8 @@ Format your response with clear sections and bullet points.`
             </div>
           </div>
 
-          <Button 
-            onClick={getRecommendation} 
+          <Button
+            onClick={getRecommendation}
             disabled={isLoading}
             className="w-full bg-green-600 hover:bg-green-700"
           >
@@ -182,7 +204,10 @@ Format your response with clear sections and bullet points.`
           <CardContent>
             <Alert>
               <AlertDescription>
-                <pre className="whitespace-pre-wrap text-sm">{recommendation}</pre>
+                <div
+                  className="prose prose-sm max-w-none"
+                  dangerouslySetInnerHTML={{ __html: formatMarkdown(recommendation) }}
+                />
               </AlertDescription>
             </Alert>
           </CardContent>

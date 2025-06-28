@@ -46,14 +46,24 @@ const ClauseSimplifier = () => {
 
 ${policyText}
 
-Please provide:
-1. SIMPLIFIED EXPLANATION: Break down the complex language into simple terms
-2. KEY POINTS: The most important things to know
-3. WHAT THIS MEANS FOR YOU: Practical implications
-4. POTENTIAL CONCERNS: Things to watch out for
-5. QUESTIONS TO ASK: What you should clarify with your insurer
+Please format your response using markdown and follow this structure:
 
-Use bullet points and clear sections. Avoid jargon and make it conversational.`
+## SIMPLIFIED EXPLANATION
+Break down the complex language into simple terms.
+
+## KEY POINTS
+- Highlight the most important takeaways.
+
+## WHAT THIS MEANS FOR YOU
+Explain how this affects the policyholder in practical terms.
+
+## POTENTIAL CONCERNS
+Mention anything the policyholder should be cautious about.
+
+## QUESTIONS TO ASK
+Suggest what questions the policyholder should ask the insurer.
+
+Keep it friendly, conversational, and free of jargon.`
             }]
           }]
         })
@@ -66,7 +76,7 @@ Use bullet points and clear sections. Avoid jargon and make it conversational.`
       const data = await response.json();
       const result = data.candidates[0]?.content?.parts[0]?.text || 'No simplification available';
       setSimplification(result);
-      
+
       toast({
         title: "Simplification Complete",
         description: "Policy clauses have been simplified into plain English.",
@@ -81,6 +91,17 @@ Use bullet points and clear sections. Avoid jargon and make it conversational.`
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const formatMarkdown = (text: string) => {
+    return text
+      .replace(/^## (.*$)/gm, '<h2 class="text-lg font-semibold mb-2 text-gray-800">$1</h2>')
+      .replace(/^### (.*$)/gm, '<h3 class="text-md font-semibold mb-2 text-gray-700">$1</h3>')
+      .replace(/^- (.*$)/gm, '<ul class="ml-4 mb-1">• $1</ul>')
+      .replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold">$1</strong>')
+      .replace(/\*(.*?)\*/g, '<em class="italic">$1</em>')
+      .replace(/\n\n/g, '<br><br>')
+      .replace(/\n/g, '<br>');
   };
 
   return (
@@ -103,6 +124,7 @@ Use bullet points and clear sections. Avoid jargon and make it conversational.`
               onChange={(e) => setPolicyText(e.target.value)}
               placeholder="Paste your insurance policy clauses, terms, or any complex insurance text here..."
               className="min-h-40"
+              disabled={isLoading}
             />
           </div>
 
@@ -134,7 +156,10 @@ Use bullet points and clear sections. Avoid jargon and make it conversational.`
           <CardContent>
             <Alert>
               <AlertDescription>
-                <pre className="whitespace-pre-wrap text-sm">{simplification}</pre>
+                <div
+                  className="prose prose-sm max-w-none"
+                  dangerouslySetInnerHTML={{ __html: formatMarkdown(simplification) }}
+                />
               </AlertDescription>
             </Alert>
           </CardContent>
