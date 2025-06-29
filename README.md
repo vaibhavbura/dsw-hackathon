@@ -84,6 +84,8 @@ src/
 
 5. **Open your browser**
    Navigate to `http://localhost:5173`
+##  Workflow
+![AI Insurance agent](https://github.com/user-attachments/assets/fbb53cb6-422a-4d3a-9f9e-6a3cfdd1ddd0)
 
 ##  Adding New Prompts
 
@@ -126,6 +128,9 @@ The system automatically selects the best prompt based on:
 ### Chat Support
 - **Question complexity**: simple/moderate/complex
 - **Customer expertise level**: beginner/intermediate/expert
+
+##  How the Best Prompt Is Chosen
+![AI Insurance agent (1)](https://github.com/user-attachments/assets/00695fe5-de8a-4343-8716-a5e5b5b67aff)
 
 ##  API Integration
 
