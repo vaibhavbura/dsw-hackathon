@@ -5,12 +5,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Shield, AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import DynamicPromptManager from "@/lib/dynamicPromptManager";
 
 const FraudDetectionAssistant = () => {
   const [transactionData, setTransactionData] = useState('');
   const [analysis, setAnalysis] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const promptManager = DynamicPromptManager.getInstance();
 
   const analyzeForFraud = async () => {
     const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
@@ -33,34 +35,21 @@ const FraudDetectionAssistant = () => {
     }
 
     setIsLoading(true);
+
     try {
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          contents: [{
-            parts: [{
-              text: `Analyze this insurance transaction/claim data for signs of fraud. Provide a risk score (1-10) and detailed explanation of any suspicious patterns. Format your response in markdown:
-
-${transactionData}
-
-Please format your response as markdown with the following structure:
-## RISK SCORE: [1-10]
-
-## FRAUD INDICATORS:
-- [List specific suspicious elements]
-
-## EXPLANATION:
-[Detailed analysis]
-
-## RECOMMENDATIONS:
-[What actions to take]`
-            }]
-          }]
-        })
+      // Get optimized prompt with dynamic selection
+      const { prompt, temperature, max_tokens, promptId } = promptManager.getOptimizedPrompt('fraud_detection', {
+        transaction_data: transactionData
+      }, {
+        // You can add selection criteria here if needed
+        // response_time_requirement: 'standard',
+        // complexity_level: 'moderate'
       });
+
+      // Create API config
+      const apiConfig = promptManager.createApiConfig(prompt, temperature, max_tokens);
+
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`, apiConfig);
 
       if (!response.ok) {
         throw new Error('Failed to analyze data');
@@ -68,11 +57,12 @@ Please format your response as markdown with the following structure:
 
       const data = await response.json();
       const result = data.candidates[0]?.content?.parts[0]?.text || 'No analysis available';
+      
       setAnalysis(result);
       
       toast({
         title: "Analysis Complete",
-        description: "Fraud detection analysis has been generated.",
+        description: `Fraud detection analysis completed using ${promptId}`,
       });
     } catch (error) {
       console.error('Analysis error:', error);
@@ -98,16 +88,18 @@ Please format your response as markdown with the following structure:
       .replace(/\n/g, '<br>');
   };
 
+  const agentConfig = promptManager.getAgentConfig('fraud_detection');
+
   return (
     <div className="space-y-6">
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Shield className="h-5 w-5 text-red-600" />
-            Fraud Detection Assistant
+            {agentConfig.name}
           </CardTitle>
           <CardDescription>
-            Analyze insurance claims and transactions for potential fraud indicators
+            {agentConfig.description}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">

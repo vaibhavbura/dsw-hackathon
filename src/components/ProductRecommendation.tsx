@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Search, User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import DynamicPromptManager from "@/lib/dynamicPromptManager";
 
 const ProductRecommendation = () => {
   const [profile, setProfile] = useState({
@@ -17,6 +18,7 @@ const ProductRecommendation = () => {
   const [recommendation, setRecommendation] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const promptManager = DynamicPromptManager.getInstance();
 
   const getRecommendation = async () => {
     const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
@@ -41,45 +43,22 @@ const ProductRecommendation = () => {
 
     setIsLoading(true);
     try {
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          contents: [{
-            parts: [{
-              text: `Based on this user profile, recommend the best insurance policies:
-
-Age: ${profile.age}
-Annual Income: $${profile.income}
-Family Size: ${profile.familySize}
-Coverage Goal: ${profile.coverageGoal}
-
-Format your response using markdown and include the following sections:
-
-## TOP RECOMMENDATIONS
-List 3 specific insurance products/policies with names and types.
-
-## REASONING
-Explain why each is suitable based on the profile.
-
-## COVERAGE AMOUNTS
-Provide suggested coverage amounts for each.
-
-## ESTIMATED COSTS
-Estimate monthly or yearly premiums (approximate).
-
-## PRIORITY ORDER
-Which policy to get first, second, and third.
-
-## ADDITIONAL CONSIDERATIONS
-Mention any profile-specific tips, concerns, or requirements.
-`
-            }]
-          }]
-        })
+      // Get optimized prompt with dynamic selection
+      const { prompt, temperature, max_tokens, promptId } = promptManager.getOptimizedPrompt('product_recommendation', {
+        age: profile.age,
+        income: profile.income,
+        family_size: profile.familySize,
+        coverage_goal: profile.coverageGoal
+      }, {
+        // You can add selection criteria here if needed
+        // budget_constraints: 'medium',
+        // coverage_complexity: 'standard'
       });
+
+      // Create API config
+      const apiConfig = promptManager.createApiConfig(prompt, temperature, max_tokens);
+
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`, apiConfig);
 
       if (!response.ok) {
         throw new Error('Failed to get recommendations');
@@ -87,11 +66,12 @@ Mention any profile-specific tips, concerns, or requirements.
 
       const data = await response.json();
       const result = data.candidates[0]?.content?.parts[0]?.text || 'No recommendations available';
+      
       setRecommendation(result);
 
       toast({
         title: "Recommendations Generated",
-        description: "Personalized insurance recommendations are ready.",
+        description: `Personalized insurance recommendations are ready using ${promptId}`,
       });
     } catch (error) {
       console.error('Recommendation error:', error);
@@ -116,16 +96,18 @@ Mention any profile-specific tips, concerns, or requirements.
       .replace(/\n/g, '<br>');
   };
 
+  const agentConfig = promptManager.getAgentConfig('product_recommendation');
+
   return (
     <div className="space-y-6">
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Search className="h-5 w-5 text-green-600" />
-            Insurance Product Recommendation
+            {agentConfig.name}
           </CardTitle>
           <CardDescription>
-            Get personalized insurance policy recommendations based on your profile
+            {agentConfig.description}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -198,13 +180,13 @@ Mention any profile-specific tips, concerns, or requirements.
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <User className="h-5 w-5 text-blue-600" />
-              Your Personalized Recommendations
+              Personalized Insurance Recommendations
             </CardTitle>
           </CardHeader>
           <CardContent>
             <Alert>
               <AlertDescription>
-                <div
+                <div 
                   className="prose prose-sm max-w-none"
                   dangerouslySetInnerHTML={{ __html: formatMarkdown(recommendation) }}
                 />

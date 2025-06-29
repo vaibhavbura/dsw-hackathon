@@ -5,12 +5,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { FileText, Info } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import DynamicPromptManager from "@/lib/dynamicPromptManager";
 
 const ClaimAssistant = () => {
   const [rejectionReason, setRejectionReason] = useState('');
   const [assistance, setAssistance] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const promptManager = DynamicPromptManager.getInstance();
 
   const getClaimHelp = async () => {
     const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
@@ -34,37 +36,19 @@ const ClaimAssistant = () => {
 
     setIsLoading(true);
     try {
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          contents: [{
-            parts: [{
-              text: `Help me understand this insurance claim rejection and draft an appeal. Here's the rejection reason:
-
-${rejectionReason}
-
-Please format your response using markdown with the following structure:
-
-## SIMPLE EXPLANATION
-[Explain the rejection reason in plain English]
-
-## WHY THIS HAPPENED
-[List common causes for this type of rejection]
-
-## APPEAL STRATEGY
-[Steps to take for a successful appeal]
-
-## DRAFT APPEAL LETTER
-[Professional appeal letter template]
-
-Use clear markdown formatting for each section.`
-            }]
-          }]
-        })
+      // Get optimized prompt with dynamic selection
+      const { prompt, temperature, max_tokens, promptId } = promptManager.getOptimizedPrompt('claim_assistant', {
+        rejection_reason: rejectionReason
+      }, {
+        // You can add selection criteria here if needed
+        // complexity_of_rejection: 'moderate',
+        // legal_involvement: 'basic'
       });
+
+      // Create API config
+      const apiConfig = promptManager.createApiConfig(prompt, temperature, max_tokens);
+
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`, apiConfig);
 
       if (!response.ok) {
         throw new Error('Failed to get claim assistance');
@@ -72,11 +56,12 @@ Use clear markdown formatting for each section.`
 
       const data = await response.json();
       const result = data.candidates[0]?.content?.parts[0]?.text || 'No assistance available';
+      
       setAssistance(result);
 
       toast({
         title: "Assistance Generated",
-        description: "Claim help and appeal draft have been created.",
+        description: `Claim help and appeal draft have been created using ${promptId}`,
       });
     } catch (error) {
       console.error('Assistance error:', error);
@@ -102,16 +87,18 @@ Use clear markdown formatting for each section.`
       .replace(/\n/g, '<br>');
   };
 
+  const agentConfig = promptManager.getAgentConfig('claim_assistant');
+
   return (
     <div className="space-y-6">
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <FileText className="h-5 w-5 text-blue-600" />
-            Insurance Claim Assistant
+            {agentConfig.name}
           </CardTitle>
           <CardDescription>
-            Get help understanding claim rejections and draft professional appeals
+            {agentConfig.description}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">

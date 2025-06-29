@@ -5,14 +5,16 @@ import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { BookOpen, FileText } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import DynamicPromptManager from "@/lib/dynamicPromptManager";
 
 const ClauseSimplifier = () => {
   const [policyText, setPolicyText] = useState('');
-  const [simplification, setSimplification] = useState('');
+  const [simplifiedText, setSimplifiedText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const promptManager = DynamicPromptManager.getInstance();
 
-  const simplifyClauses = async () => {
+  const simplifyClause = async () => {
     const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
     if (!apiKey) {
       toast({
@@ -25,8 +27,8 @@ const ClauseSimplifier = () => {
 
     if (!policyText.trim()) {
       toast({
-        title: "No Text Provided",
-        description: "Please enter insurance policy text or clauses to simplify.",
+        title: "No Policy Text Provided",
+        description: "Please enter the insurance policy text you want to simplify.",
         variant: "destructive",
       });
       return;
@@ -34,58 +36,38 @@ const ClauseSimplifier = () => {
 
     setIsLoading(true);
     try {
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          contents: [{
-            parts: [{
-              text: `Please simplify this insurance policy text into plain English that anyone can understand:
-
-${policyText}
-
-Please format your response using markdown and follow this structure:
-
-## SIMPLIFIED EXPLANATION
-Break down the complex language into simple terms.
-
-## KEY POINTS
-- Highlight the most important takeaways.
-
-## WHAT THIS MEANS FOR YOU
-Explain how this affects the policyholder in practical terms.
-
-## POTENTIAL CONCERNS
-Mention anything the policyholder should be cautious about.
-
-## QUESTIONS TO ASK
-Suggest what questions the policyholder should ask the insurer.
-
-Keep it friendly, conversational, and free of jargon.`
-            }]
-          }]
-        })
+      // Get optimized prompt with dynamic selection
+      const { prompt, temperature, max_tokens, promptId } = promptManager.getOptimizedPrompt('clause_simplifier', {
+        policy_text: policyText
+      }, {
+        // You can add selection criteria here if needed
+        // complexity_of_language: 'moderate',
+        // legal_importance: 'medium'
       });
 
+      // Create API config
+      const apiConfig = promptManager.createApiConfig(prompt, temperature, max_tokens);
+
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`, apiConfig);
+
       if (!response.ok) {
-        throw new Error('Failed to simplify clauses');
+        throw new Error('Failed to simplify policy text');
       }
 
       const data = await response.json();
-      const result = data.candidates[0]?.content?.parts[0]?.text || 'No simplification available';
-      setSimplification(result);
+      const result = data.candidates[0]?.content?.parts[0]?.text || 'No simplified text available';
+      
+      setSimplifiedText(result);
 
       toast({
-        title: "Simplification Complete",
-        description: "Policy clauses have been simplified into plain English.",
+        title: "Policy Simplified",
+        description: `Policy text has been simplified using ${promptId}`,
       });
     } catch (error) {
       console.error('Simplification error:', error);
       toast({
         title: "Request Failed",
-        description: "Failed to simplify clauses. Please check your API key and try again.",
+        description: "Failed to simplify the policy text. Please check your API key and try again.",
         variant: "destructive",
       });
     } finally {
@@ -98,11 +80,14 @@ Keep it friendly, conversational, and free of jargon.`
       .replace(/^## (.*$)/gm, '<h2 class="text-lg font-semibold mb-2 text-gray-800">$1</h2>')
       .replace(/^### (.*$)/gm, '<h3 class="text-md font-semibold mb-2 text-gray-700">$1</h3>')
       .replace(/^- (.*$)/gm, '<ul class="ml-4 mb-1">• $1</ul>')
+      .replace(/^\* (.*$)/gm, '<ul class="ml-4 mb-1">• $1</ul>')
       .replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold">$1</strong>')
       .replace(/\*(.*?)\*/g, '<em class="italic">$1</em>')
       .replace(/\n\n/g, '<br><br>')
       .replace(/\n/g, '<br>');
   };
+
+  const agentConfig = promptManager.getAgentConfig('clause_simplifier');
 
   return (
     <div className="space-y-6">
@@ -110,10 +95,10 @@ Keep it friendly, conversational, and free of jargon.`
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <BookOpen className="h-5 w-5 text-purple-600" />
-            Insurance Clause Simplifier
+            {agentConfig.name}
           </CardTitle>
           <CardDescription>
-            Convert complex insurance policy language into simple, understandable English
+            {agentConfig.description}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -122,21 +107,14 @@ Keep it friendly, conversational, and free of jargon.`
             <Textarea
               value={policyText}
               onChange={(e) => setPolicyText(e.target.value)}
-              placeholder="Paste your insurance policy clauses, terms, or any complex insurance text here..."
-              className="min-h-40"
+              placeholder="Paste the complex insurance policy language here..."
+              className="min-h-32"
               disabled={isLoading}
             />
           </div>
 
-          <div className="bg-blue-50 p-4 rounded-lg">
-            <p className="text-sm text-blue-800">
-              <strong>Tip:</strong> You can copy and paste text from PDF files, policy documents, 
-              or any insurance-related document you need help understanding.
-            </p>
-          </div>
-
           <Button 
-            onClick={simplifyClauses} 
+            onClick={simplifyClause} 
             disabled={isLoading}
             className="w-full bg-purple-600 hover:bg-purple-700"
           >
@@ -145,20 +123,20 @@ Keep it friendly, conversational, and free of jargon.`
         </CardContent>
       </Card>
 
-      {simplification && (
+      {simplifiedText && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <FileText className="h-5 w-5 text-green-600" />
-              Simplified Explanation
+              Simplified Policy Explanation
             </CardTitle>
           </CardHeader>
           <CardContent>
             <Alert>
               <AlertDescription>
-                <div
+                <div 
                   className="prose prose-sm max-w-none"
-                  dangerouslySetInnerHTML={{ __html: formatMarkdown(simplification) }}
+                  dangerouslySetInnerHTML={{ __html: formatMarkdown(simplifiedText) }}
                 />
               </AlertDescription>
             </Alert>
