@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -7,9 +6,13 @@ import ClaimAssistant from "@/components/ClaimAssistant";
 import ProductRecommendation from "@/components/ProductRecommendation";
 import ClauseSimplifier from "@/components/ClauseSimplifier";
 import ChatSupport from "@/components/ChatSupport";
-import { Shield, FileText, Search, BookOpen, MessageCircle } from "lucide-react";
+import { Shield, FileText, Search, BookOpen, MessageCircle, Sparkles } from "lucide-react";
+import DynamicPromptManager from "@/lib/dynamicPromptManager";
 
 const Index = () => {
+  const promptManager = DynamicPromptManager.getInstance();
+  const projectInfo = promptManager.getProjectInfo();
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <div className="container mx-auto px-4 py-8">
@@ -17,11 +20,11 @@ const Index = () => {
         <div className="text-center mb-12">
           <div className="flex items-center justify-center mb-4">
             <Shield className="h-12 w-12 text-blue-600 mr-3" />
-            <h1 className="text-4xl font-bold text-gray-900">AI Insurance Assistant</h1>
+            <h1 className="text-4xl font-bold text-gray-900">{projectInfo.name}</h1>
+            <Sparkles className="h-6 w-6 text-yellow-500 ml-2" />
           </div>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Your comprehensive AI-powered insurance companion for fraud detection, claim assistance, 
-            product recommendations, policy clarification, and live chat support.
+           Your comprehensive AI-powered insurance companion for fraud detection, claim assistance, product recommendations, policy clarification, and live chat support.
           </p>
         </div>
 
@@ -83,7 +86,7 @@ const Index = () => {
 
         {/* Footer */}
         <div className="text-center mt-12 text-gray-600">
-          <p>Made by Vaibhav Bura ♥</p>
+          <p>Made by Vaibhav Bura ♥ | Powered by Dynamic AI Prompts</p>
         </div>
       </div>
     </div>
