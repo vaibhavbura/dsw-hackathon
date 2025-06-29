@@ -2,7 +2,7 @@
 
 A comprehensive AI-powered insurance platform featuring 5 specialized GenAI agents for fraud detection, claims assistance, product recommendations, policy clarification, and customer support.
 
-## 🚀 Features
+##  Features
 
 ### Dynamic Prompt Selection System
 - **Multiple prompt variations** per agent for different use cases
@@ -12,32 +12,28 @@ A comprehensive AI-powered insurance platform featuring 5 specialized GenAI agen
 
 ### AI Agents
 
-1. **Fraud Detection Assistant** 🛡️
+1. **Fraud Detection Assistant** 
    - Standard fraud analysis with risk scoring
    - Quick risk assessment for high-volume processing
-   - Detailed investigation for complex cases
 
-2. **Claim Assistant** 📄
+2. **Claim Assistant** 
    - Standard claim rejection analysis and appeal guidance
    - Quick appeal guide for simple rejections
-   - Legal appeal specialist for complex cases
 
-3. **Product Recommendation Agent** 🔍
+3. **Product Recommendation Agent** 
    - Standard product matching
    - Budget-focused recommendations
-   - Comprehensive coverage specialist
 
-4. **Clause Simplifier** 📚
+4. **Clause Simplifier** 
    - Standard clause simplification
-   - Quick translation
-   - Legal analysis expert
+   - Quick translation in simple words
 
-5. **Chat Support Agent** 💬
+
+5. **Chat Support Agent** 
    - Standard customer support
    - Quick response
-   - Expert consultation
 
-## 🛠️ Technology Stack
+##  Technology Stack
 
 - **Frontend**: React + TypeScript + Tailwind CSS
 - **AI Model**: Google Gemini 1.5 Flash
@@ -66,8 +62,8 @@ src/
 
 1. **Clone the repository**
    ```bash
-   git clone <repository-url>
-   cd ai-insurance-assistant
+   git clone https://github.com/vaibhavbura/dsw-hackathon.git
+   cd dsw-hackathon
    ```
 
 2. **Install dependencies**
@@ -89,7 +85,7 @@ src/
 5. **Open your browser**
    Navigate to `http://localhost:5173`
 
-## 📝 Adding New Prompts
+##  Adding New Prompts
 
 
 Each agent has its own JSON file in the `src/prompts/` directory. To add a new prompt:
@@ -107,7 +103,7 @@ Each agent has its own JSON file in the `src/prompts/` directory. To add a new p
 ```
 
 
-## 🎯 Prompt Selection Logic
+##  Prompt Selection Logic
 
 The system automatically selects the best prompt based on:
 
@@ -131,7 +127,7 @@ The system automatically selects the best prompt based on:
 - **Question complexity**: simple/moderate/complex
 - **Customer expertise level**: beginner/intermediate/expert
 
-## 🔄 API Integration
+##  API Integration
 
 | Parameter       | Purpose                                          | Use Case Examples                                                                                                         |
 | --------------- | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------- |
@@ -140,7 +136,7 @@ The system automatically selects the best prompt based on:
 | **Priority**    | Sets base importance of prompt (used in scoring) | `1 = Low`, `2 = Medium`, `3 = High` <br> Higher priority prompts are favored when criteria match is equal                 |
 
 
-## 🚀 Deployment
+##  Deployment
 
 ### Build for Production
 ```bash
@@ -154,7 +150,7 @@ vercel
 ```
 
 
-## 📊 Performance
+## Performance
 
 - **Fast response times** - optimized prompt selection
 - **Efficient API usage** - appropriate token limits
@@ -163,7 +159,7 @@ vercel
 
 
 
-## 👨‍💻 Author
+##  Author
 
 **Vaibhav Bura**
 - Built for DSW GenAI Agent Hackathon
