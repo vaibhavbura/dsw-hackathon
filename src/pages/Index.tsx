@@ -86,7 +86,7 @@ const Index = () => {
 
         {/* Footer */}
         <div className="text-center mt-12 text-gray-600">
-          <p>Made by Vaibhav Bura ♥ | Powered by Dynamic AI Prompts</p>
+          <p>Made by Vaibhav Bura ♥</p>
         </div>
       </div>
     </div>

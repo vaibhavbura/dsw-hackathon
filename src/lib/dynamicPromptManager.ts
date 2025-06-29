@@ -2,7 +2,7 @@ import fraudDetectionPrompts from '../prompts/fraud_detection.json';
 import claimAssistantPrompts from '../prompts/claim_assistant.json';
 import productRecommendationPrompts from '../prompts/product_recommendation.json';
 import clauseSimplifierPrompts from '../prompts/clause_simplifier.json';
-import chatSupportPrompts from '../prompts/chat_support.json';
+
 
 export interface PromptConfig {
   id: string;
@@ -56,7 +56,6 @@ class DynamicPromptManager {
       claim_assistant: claimAssistantPrompts as AgentPromptData,
       product_recommendation: productRecommendationPrompts as AgentPromptData,
       clause_simplifier: clauseSimplifierPrompts as AgentPromptData,
-      chat_support: chatSupportPrompts as AgentPromptData,
     };
   }
 
@@ -126,9 +125,6 @@ class DynamicPromptManager {
         break;
       case 'clause_simplifier':
         score = this.scoreClauseSimplifierPrompt(prompt, criteria);
-        break;
-      case 'chat_support':
-        score = this.scoreChatSupportPrompt(prompt, criteria);
         break;
       default:
         score = prompt.priority; // Fallback to priority
@@ -233,29 +229,8 @@ class DynamicPromptManager {
     return score;
   }
 
-  private scoreChatSupportPrompt(prompt: PromptConfig, criteria: PromptSelectionCriteria): number {
-    let score = prompt.priority * 10;
+  
 
-    // Question complexity
-    if (criteria.question_complexity === 'simple' && prompt.id.includes('v2')) {
-      score += 20;
-    } else if (criteria.question_complexity === 'complex' && prompt.id.includes('v3')) {
-      score += 20;
-    } else if (criteria.question_complexity === 'moderate' && prompt.id.includes('v1')) {
-      score += 20;
-    }
-
-    // Customer expertise level
-    if (criteria.customer_expertise_level === 'expert' && prompt.id.includes('v3')) {
-      score += 15;
-    } else if (criteria.customer_expertise_level === 'beginner' && prompt.id.includes('v2')) {
-      score += 15;
-    } else if (criteria.customer_expertise_level === 'intermediate' && prompt.id.includes('v1')) {
-      score += 15;
-    }
-
-    return score;
-  }
 
   /**
    * Get optimized prompt with variable replacement
@@ -283,7 +258,7 @@ class DynamicPromptManager {
     };
   }
 
-  /**
+  /*
    * Create API configuration for Gemini
    */
   public createApiConfig(prompt: string, temperature: number, maxTokens: number) {

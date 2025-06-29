@@ -1,54 +1,73 @@
-# AI Insurance Agent Platform
+# AI Insurance Assistant Platform
 
-AI Insurance Assistant is a multi-agent GenAI platform for solving real-world insurance challenges like fraud detection, claims, and policy clarification.It uses Google’s Gemini model to deliver domain-specific, intelligent responses in real-time.
-Built with React and TypeScript, it offers a clean and interactive user experience.
+A comprehensive AI-powered insurance platform featuring 5 specialized GenAI agents for fraud detection, claims assistance, product recommendations, policy clarification, and customer support.
 
 ## 🚀 Features
 
+### Dynamic Prompt Selection System
+- **Multiple prompt variations** per agent for different use cases
+- **Intelligent prompt selection** based on criteria like complexity, urgency, and user expertise
+- **Extensible architecture** - easily add new prompts without code changes
+- **JSON-based configuration** for easy maintenance and updates
+
 ### AI Agents
 
-1. **Fraud Detection Assistant**
-   - Analyzes insurance claims and transactions for fraud indicators
-   - Provides risk scores and detailed analysis
+1. **Fraud Detection Assistant** 🛡️
+   - Standard fraud analysis with risk scoring
+   - Quick risk assessment for high-volume processing
+   - Detailed investigation for complex cases
 
-2. **Customer Support GenAI Agent**
-   - Interactive chat interface for insurance-related queries
-   - Professional and friendly customer service experience
+2. **Claim Assistant** 📄
+   - Standard claim rejection analysis and appeal guidance
+   - Quick appeal guide for simple rejections
+   - Legal appeal specialist for complex cases
 
-3. **Insurance Claim Assistant**
-   - Helps understand claim rejections
-   - Generates professional appeal letters
-   - Provides step-by-step guidance for claim processes
+3. **Product Recommendation Agent** 🔍
+   - Standard product matching
+   - Budget-focused recommendations
+   - Comprehensive coverage specialist
 
-4. **Insurance Product Recommendation Agent**
-   - Personalized insurance recommendations based on user profile
-   - Considers age, income, family size, and coverage goals
+4. **Clause Simplifier** 📚
+   - Standard clause simplification
+   - Quick translation
+   - Legal analysis expert
 
-5. **Clause Simplifier**
-   - Converts complex insurance policy language into plain English
-   - Breaks down legal jargon into understandable terms
-   - Highlights key points and potential concerns
+5. **Chat Support Agent** 💬
+   - Standard customer support
+   - Quick response
+   - Expert consultation
 
 ## 🛠️ Technology Stack
 
-- **Frontend:** React+TypeScript
-- **Styling:** Tailwind CSS
-- **UI Components:** shadcn/ui
-- **AI Model:** Google Gemini API
-- **Icons:** Lucide React
+- **Frontend**: React + TypeScript + Tailwind CSS
+- **AI Model**: Google Gemini 1.5 Flash
+- **UI Components**: shadcn/ui
+- **Build Tool**: Vite
+- **Prompt Management**: Dynamic JSON-based system
 
-## 📋 Prerequisites
+## 📁 Project Structure
 
-- Node.js (v16 or higher)
-- npm or yarn
-- Google Gemini API key
+```
+src/
+├── components/          
+├── lib/
+│   └── dynamicPromptManager.ts  
+├── prompts/           
+│   ├── fraud_detection.json
+│   ├── claim_assistant.json
+│   ├── product_recommendation.json
+│   ├── clause_simplifier.json
+│   └── chat_support.json
+└── pages/
+    └── Index.tsx       
+```
 
-## 🔧 Installation
+## 🔧 Setup Instructions
 
 1. **Clone the repository**
    ```bash
-   git clone <your-repository-url>
-   cd ai-insurance-agent
+   git clone <repository-url>
+   cd ai-insurance-assistant
    ```
 
 2. **Install dependencies**
@@ -59,59 +78,97 @@ Built with React and TypeScript, it offers a clean and interactive user experien
 3. **Set up environment variables**
    Create a `.env` file in the root directory:
    ```env
-   VITE_GEMINI_API_KEY=your-gemini-api-key-here
+   VITE_GEMINI_API_KEY=your_gemini_api_key_here
    ```
 
-4. **Get your Gemini API key**
-   - Visit [Google AI Studio](https://makersuite.google.com/app/apikey)
-   - Create a new API key
-   - Copy the key to your `.env` file
+4. **Run the development server**
+   ```bash
+   npm run dev
+   ```
 
-## 🚀 Running the Application
+5. **Open your browser**
+   Navigate to `http://localhost:5173`
 
-### Development Mode
-```bash
-npm run dev
+## 📝 Adding New Prompts
+
+
+Each agent has its own JSON file in the `src/prompts/` directory. To add a new prompt:
+
+```json
+{
+  "id": "agent_name_v4",
+  "name": "New Prompt Name",
+  "description": "Description of what this prompt does",
+  "prompt": "Your prompt template with {variables}",
+  "temperature": 0.3,
+  "max_tokens": 2000,
+  "priority": 4
+}
 ```
-The application will be available at `http://localhost:8080`
+
+
+## 🎯 Prompt Selection Logic
+
+The system automatically selects the best prompt based on:
+
+### Fraud Detection
+- **Response time requirement**: fast/standard/detailed
+- **Complexity level**: simple/moderate/complex
+
+### Claim Assistant
+- **Complexity of rejection**: simple/moderate/complex
+- **Legal involvement**: none/basic/extensive
+
+### Product Recommendation
+- **Budget constraints**: low/medium/high
+- **Coverage complexity**: basic/standard/comprehensive
+
+### Clause Simplifier
+- **Complexity of language**: simple/moderate/complex
+- **Legal importance**: low/medium/high
+
+### Chat Support
+- **Question complexity**: simple/moderate/complex
+- **Customer expertise level**: beginner/intermediate/expert
+
+## 🔄 API Integration
+
+| Parameter       | Purpose                                          | Use Case Examples                                                                                                         |
+| --------------- | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------- |
+| **Temperature** | Controls response creativity and randomness      | `Low (0.2)` → Accurate and focused (e.g., fraud checks)  <br> `High (0.6+)` → Creative and varied (e.g., recommendations) |
+| **Max Tokens**  | Limits length of AI output                       | `1000` → Short responses like quick risk assessment <br> `3000+` → Detailed investigation or legal analysis               |
+| **Priority**    | Sets base importance of prompt (used in scoring) | `1 = Low`, `2 = Medium`, `3 = High` <br> Higher priority prompts are favored when criteria match is equal                 |
+
+
+## 🚀 Deployment
 
 ### Build for Production
 ```bash
 npm run build
 ```
 
-### Preview Production Build
+### Deploy to Vercel
 ```bash
-npm run preview
+npm install -g vercel
+vercel
 ```
 
 
-## 🏗️ Project Structure
+## 📊 Performance
 
-```
-src/
-├── components/
-│   ├── ui/                 # shadcn/ui components
-│   ├── ChatSupport.tsx     # Customer support agent
-│   ├── ClaimAssistant.tsx  # Claim help agent
-│   ├── ClauseSimplifier.tsx # Policy simplification agent
-│   ├── FraudDetectionAssistant.tsx # Fraud analysis agent
-│   └── ProductRecommendation.tsx # Product recommendation agent
-├── hooks/                  # Custom React hooks
-├── lib/                    # Utility functions
-├── pages/                  # Page components
-└── App.tsx                 # Main application component
-```
+- **Fast response times** - optimized prompt selection
+- **Efficient API usage** - appropriate token limits
+- **Scalable architecture** - easy to add new agents and prompts
 
-## 🔒 Security
 
-- API keys are stored in environment variables
-- Never commit `.env` files to version control
-- Use `.env.example` as a template for required environment variables
 
-## 🙏 Acknowledgments
 
-- Built with [shadcn/ui](https://ui.shadcn.com/) components
-- Powered by [Google Gemini AI](https://ai.google.dev/)
-- Icons from [Lucide React](https://lucide.dev/)
+## 👨‍💻 Author
+
+**Vaibhav Bura**
+- Built for DSW GenAI Agent Hackathon
+
+---
+
+
 
