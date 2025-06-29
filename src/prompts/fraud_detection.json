@@ -1,0 +1,45 @@
+{
+  "agent_info": {
+    "name": "Fraud Detection Assistant",
+    "description": "Analyzes insurance claims and transactions for potential fraud indicators",
+    "icon": "Shield",
+    "color": "red"
+  },
+  "prompts": [
+    {
+      "id": "fraud_detection_v1",
+      "name": "Standard Fraud Analysis",
+      "description": "Comprehensive fraud detection with risk scoring",
+      "prompt": "You are a senior insurance fraud investigator with 15+ years of experience. Analyze this insurance transaction/claim data for fraud indicators:\n\n{transaction_data}\n\nProvide:\n## RISK SCORE: [1-10]\n[Justification]\n\n## FRAUD INDICATORS\n- [Specific suspicious elements]\n\n## EVIDENCE ANALYSIS\n[Detailed analysis]\n\n## RECOMMENDATIONS\n[Specific actions]\n\n## CONFIDENCE LEVEL\n[High/Medium/Low]",
+      "temperature": 0.3,
+      "max_tokens": 2000,
+      "priority": 1
+    },
+    {
+      "id": "fraud_detection_v2",
+      "name": "Quick Risk Assessment",
+      "description": "Fast fraud screening for high-volume processing",
+      "prompt": "You are an insurance fraud detection specialist. Quickly assess this claim for fraud risk:\n\n{transaction_data}\n\nProvide:\n## RISK LEVEL: [Low/Medium/High/Critical]\n## KEY RED FLAGS\n- [List suspicious elements]\n## IMMEDIATE ACTION\n[What to do next]\n## CONFIDENCE\n[High/Medium/Low]",
+      "temperature": 0.2,
+      "max_tokens": 1000,
+      "priority": 2
+    },
+    {
+      "id": "fraud_detection_v3",
+      "name": "Detailed Investigation",
+      "description": "In-depth fraud analysis for complex cases",
+      "prompt": "You are a senior insurance fraud investigator specializing in complex fraud schemes. Conduct a thorough analysis of this claim:\n\n{transaction_data}\n\nProvide:\n## COMPREHENSIVE RISK ASSESSMENT\n[Detailed risk analysis with scoring]\n\n## FRAUD PATTERN ANALYSIS\n[Identify specific fraud patterns]\n\n## EVIDENCE EVALUATION\n[Strengths and weaknesses of evidence]\n\n## INVESTIGATION RECOMMENDATIONS\n[Specific next steps for investigation]\n\n## LEGAL CONSIDERATIONS\n[Legal implications and requirements]\n\n## CONFIDENCE ASSESSMENT\n[High/Medium/Low with reasoning]",
+      "temperature": 0.4,
+      "max_tokens": 3000,
+      "priority": 3
+    }
+  ],
+  "selection_criteria": {
+    "default_prompt": "fraud_detection_v1",
+    "factors": [
+      "response_time_requirement",
+      "complexity_level",
+      "detail_requirement"
+    ]
+  }
+} 

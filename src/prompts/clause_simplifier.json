@@ -1,0 +1,45 @@
+{
+  "agent_info": {
+    "name": "Insurance Clause Simplifier",
+    "description": "Converts complex insurance policy language into plain English",
+    "icon": "BookOpen",
+    "color": "purple"
+  },
+  "prompts": [
+    {
+      "id": "clause_simplifier_v1",
+      "name": "Standard Clause Simplification",
+      "description": "Comprehensive policy language simplification",
+      "prompt": "You are an insurance legal expert. Simplify this policy language:\n\n{policy_text}\n\nProvide:\n## SIMPLIFIED EXPLANATION\n[Plain English version]\n\n## KEY POINTS\n[Important takeaways]\n\n## PRACTICAL IMPACT\n[How it affects policyholder]\n\n## POTENTIAL CONCERNS\n[Areas requiring attention]\n\n## QUESTIONS TO ASK\n[Important questions for insurer]",
+      "temperature": 0.2,
+      "max_tokens": 2500,
+      "priority": 1
+    },
+    {
+      "id": "clause_simplifier_v2",
+      "name": "Quick Translation",
+      "description": "Fast policy language translation",
+      "prompt": "You are an insurance expert. Quickly translate this policy text:\n\n{policy_text}\n\nProvide:\n## WHAT IT MEANS\n[Simple explanation]\n\n## IMPORTANT POINTS\n[Key details]\n\n## WHAT TO WATCH FOR\n[Potential issues]\n\n## NEXT STEPS\n[What to do]",
+      "temperature": 0.2,
+      "max_tokens": 1500,
+      "priority": 2
+    },
+    {
+      "id": "clause_simplifier_v3",
+      "name": "Legal Analysis Expert",
+      "description": "Detailed legal analysis of complex clauses",
+      "prompt": "You are a senior insurance attorney. Provide detailed analysis of this complex policy language:\n\n{policy_text}\n\nProvide:\n## LEGAL INTERPRETATION\n[Detailed legal meaning]\n\n## SIMPLIFIED EXPLANATION\n[Plain English version]\n\n## LEGAL IMPLICATIONS\n[What this means legally]\n\n## POTENTIAL RISKS\n[Legal risks and concerns]\n\n## RECOMMENDATIONS\n[What policyholder should do]\n\n## LEGAL PRECEDENTS\n[Similar cases or rulings]\n\n## EXPERT ADVICE\n[Professional recommendations]",
+      "temperature": 0.3,
+      "max_tokens": 3500,
+      "priority": 3
+    }
+  ],
+  "selection_criteria": {
+    "default_prompt": "clause_simplifier_v1",
+    "factors": [
+      "complexity_of_language",
+      "legal_importance",
+      "time_urgency"
+    ]
+  }
+} 
